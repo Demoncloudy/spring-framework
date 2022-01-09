@@ -16,9 +16,6 @@
 
 package org.apache.commons.logging;
 
-import java.io.Serializable;
-import java.util.logging.LogRecord;
-
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.spi.ExtendedLogger;
@@ -26,6 +23,9 @@ import org.apache.logging.log4j.spi.LoggerContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.spi.LocationAwareLogger;
+
+import java.io.Serializable;
+import java.util.logging.LogRecord;
 
 /**
  * Spring's common JCL adapter behind {@link LogFactory} and {@link LogFactoryService}.
@@ -48,7 +48,9 @@ final class LogAdapter {
 	private static final LogApi logApi;
 
 	static {
+		// 根据配置初始化
 		if (isPresent(LOG4J_SPI)) {
+			// spring 偏好log4j, 尽管加入了slf4j, spring也不会用, 除非再加入log4j到slf4j的桥接器
 			if (isPresent(LOG4J_SLF4J_PROVIDER) && isPresent(SLF4J_SPI)) {
 				// log4j-to-slf4j bridge -> we'll rather go with the SLF4J SPI;
 				// however, we still prefer Log4j over the plain SLF4J API since
@@ -84,6 +86,7 @@ final class LogAdapter {
 	 * @param name the logger name
 	 */
 	public static Log createLog(String name) {
+		// 适配日志, logApi在静态代码块中初始化
 		switch (logApi) {
 			case LOG4J:
 				return Log4jAdapter.createLog(name);
