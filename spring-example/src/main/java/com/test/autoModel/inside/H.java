@@ -17,7 +17,7 @@ public class H {
 		context.getBean(J.class);
 	}
 
-	class J {
+	static class J {
 		public J(H h) {
 
 		}
