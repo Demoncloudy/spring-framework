@@ -4,14 +4,19 @@
 	   xsi:schemaLocation="http://www.springframework.org/schema/beans
        http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-	<!--	<bean id="m" class="com.test.autoModel.defaults.M" >-->
-	<!--&lt;!&ndash;		<property name="nfsdfsdfsdf">&ndash;&gt;-->
-	<!--&lt;!&ndash;			<ref bean="n"></ref>&ndash;&gt;-->
-	<!--&lt;!&ndash;		</property>&ndash;&gt;-->
-	<!--	</bean>-->
+<!--		<bean id="m" class="com.test.autoModel.defaults.M" >-->
+<!--	&lt;!&ndash;		<property name="nfsdfsdfsdf">&ndash;&gt;-->
+<!--	&lt;!&ndash;			<ref bean="n"></ref>&ndash;&gt;-->
+<!--	&lt;!&ndash;		</property>&ndash;&gt;-->
+<!--		</bean>-->
+	<bean id="m" class="com.test.autoModel.defaults.M" autowire="byType" >
+		<!--		<property name="nfsdfsdfsdf">-->
+		<!--			<ref bean="n"></ref>-->
+		<!--		</property>-->
+	</bean>
 
-	<!--	<bean id="n"  class="com.test.autoModel.defaults.N" autowire="byType">-->
-	<!--	</bean>-->
+		<bean id="n"  class="com.test.autoModel.defaults.N" autowire="byType">
+		</bean>
 
 	<!--	<bean id="a"  class="com.test.autoModel.defaults.A">-->
 	<!--	</bean>-->

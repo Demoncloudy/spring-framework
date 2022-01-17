@@ -32,6 +32,7 @@ public class ModelTest {
 	public void defaultModel() {
 		AnnotationConfigApplicationContext
 				context = new AnnotationConfigApplicationContext();
+		// spring中默认注入模型为0, 注入模型决定通过什么方式去注入, 构造方法还是set等
 		context.register(ModelConfig.class);
 		//改变了A的注入模型 spring当中的注入模型很重要
 		context.register(ModelBeanFactoryPostProcessor.class);

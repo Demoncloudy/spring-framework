@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 @Slf4j(topic = "e")
 public class A  implements ExampleAware{
 
+
 	ExampleBean exampleBean;
 
 	public A(){
@@ -14,7 +15,7 @@ public class A  implements ExampleAware{
 	}
 
 
-
+	// 提供构造方法的依赖注入
 	public A(C c,B b,ExampleBean exampleBean){
 		log.debug("Constructor from c b,exampleBean");
 		//this.exampleBean =exampleBean;
@@ -27,6 +28,7 @@ public class A  implements ExampleAware{
 	public A(B b) {
 		log.debug("default Constructor b");
 	}
+	// 提供set方法的依赖注入
 	@Override
 	public void setExampleBean(ExampleBean exampleBean) {
 		//this.exampleBean=exampleBean;
