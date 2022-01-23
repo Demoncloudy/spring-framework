@@ -597,6 +597,10 @@ public abstract class AbstractApplicationContext extends DefaultResourceLoader
 	 */
 	protected void initPropertySources() {
 		// For subclasses: do nothing by default.
+		// 添加必要的条件
+		// 对于org.springframework.context.annotation.AnnotationConfigApplicationContext没有必要的条件
+		// 环境中必须有xxx为key的环境变量才可以
+		//getEnvironment().setRequiredProperties("xxx");
 	}
 
 	/**
