@@ -57,17 +57,25 @@ final class PostProcessorRegistrationDelegate {
 			ConfigurableListableBeanFactory beanFactory, List<BeanFactoryPostProcessor> beanFactoryPostProcessors) {
 
 		// Invoke BeanDefinitionRegistryPostProcessors first, if any.
+		// 存放非API提供的已经处理完的BeanFactoryPostProcessor和它的子类接口BeanDefinitionRegistryPostProcessor, 防止其重复执行
+		// API提供的不会重复执行
 		Set<String> processedBeans = new HashSet<>();
-
+		// bean factory为DefaultListableBeanFactory
 		if (beanFactory instanceof BeanDefinitionRegistry) {
+			// 转换为BeanDefinitionRegistry, 用来注册bean
 			BeanDefinitionRegistry registry = (BeanDefinitionRegistry) beanFactory;
+			// 存储父类的BeanFactoryPostProcessor的bean
 			List<BeanFactoryPostProcessor> regularPostProcessors = new ArrayList<>();
+			// 存放其子类接口BeanDefinitionRegistryPostProcessor的bean
 			List<BeanDefinitionRegistryPostProcessor> registryProcessors = new ArrayList<>();
-
+			// 第一次子类执行 执行通过api放入的
+			// 通过API放入其中的beanFactoryPostProcessors
 			for (BeanFactoryPostProcessor postProcessor : beanFactoryPostProcessors) {
+				// 实现子类接口的
 				if (postProcessor instanceof BeanDefinitionRegistryPostProcessor) {
 					BeanDefinitionRegistryPostProcessor registryProcessor =
 							(BeanDefinitionRegistryPostProcessor) postProcessor;
+					// 直接回调子类的
 					registryProcessor.postProcessBeanDefinitionRegistry(registry);
 					registryProcessors.add(registryProcessor);
 				}
@@ -80,25 +88,40 @@ final class PostProcessorRegistrationDelegate {
 			// uninitialized to let the bean factory post-processors apply to them!
 			// Separate between BeanDefinitionRegistryPostProcessors that implement
 			// PriorityOrdered, Ordered, and the rest.
+			// 当前需要执行的post processor, 分批放入, 然后清空上一批
 			List<BeanDefinitionRegistryPostProcessor> currentRegistryProcessors = new ArrayList<>();
 
 			// First, invoke the BeanDefinitionRegistryPostProcessors that implement PriorityOrdered.
+			// 第二次子类执行 执行spring自己的, 目的是在bean factory中放入扫描添加注解的bean
+			// 扫描bean factory, 包括spring自己加入的类,
+			// 这里只有一个org.springframework.context.annotation.ConfigurationClassPostProcessor
 			String[] postProcessorNames =
 					beanFactory.getBeanNamesForType(BeanDefinitionRegistryPostProcessor.class, true, false);
 			for (String ppName : postProcessorNames) {
-				if (beanFactory.isTypeMatch(ppName, PriorityOrdered.class)) {
+				// 是否实现了PriorityOrdered接口
+				// ConfigurationClassPostProcessor这里实现了这个接口
+				if (beanFactory.isTypeMatch(ppName, Ordered.class)) {
+					// beanFactory.getBean的时候, 会去实例化ConfigurationClassPostProcessor, 并且存放在单例池中
 					currentRegistryProcessors.add(beanFactory.getBean(ppName, BeanDefinitionRegistryPostProcessor.class));
 					processedBeans.add(ppName);
 				}
 			}
+			// 排序
 			sortPostProcessors(currentRegistryProcessors, beanFactory);
+			// 合并, 放入子类的存储中. 以后可以执行父类的方法
 			registryProcessors.addAll(currentRegistryProcessors);
+			// 执行, ConfigurationClassPostProcessor执行完成后, 就完成了扫描
 			invokeBeanDefinitionRegistryPostProcessors(currentRegistryProcessors, registry);
+			// 清空
 			currentRegistryProcessors.clear();
 
+			// 第三次子类执行 执行上次扫描出来 并且实现order接口的bean
 			// Next, invoke the BeanDefinitionRegistryPostProcessors that implement Ordered.
+			// ConfigurationClassPostProcessor执行完成后,beanFactory中就包含了注解加入的bean
 			postProcessorNames = beanFactory.getBeanNamesForType(BeanDefinitionRegistryPostProcessor.class, true, false);
 			for (String ppName : postProcessorNames) {
+				// 去掉已经处理过的ConfigurationClassPostProcessor
+				// 添加实现子类BeanDefinitionRegistryPostProcessor接口, 并且实现了Ordered接口的bean
 				if (!processedBeans.contains(ppName) && beanFactory.isTypeMatch(ppName, Ordered.class)) {
 					currentRegistryProcessors.add(beanFactory.getBean(ppName, BeanDefinitionRegistryPostProcessor.class));
 					processedBeans.add(ppName);
@@ -110,6 +133,8 @@ final class PostProcessorRegistrationDelegate {
 			currentRegistryProcessors.clear();
 
 			// Finally, invoke all other BeanDefinitionRegistryPostProcessors until no further ones appear.
+			// 第四次子类执行 执行实现子类的bean, 包括第三次执行post processor中新添加的bean和没有实现order接口的bean,
+			// while循环的意思是 可能第四次执行的时候, 又会注入新的bean到bean factory中, 循环可以保证所有的都会被执行到
 			boolean reiterate = true;
 			while (reiterate) {
 				reiterate = false;
@@ -128,7 +153,9 @@ final class PostProcessorRegistrationDelegate {
 			}
 
 			// Now, invoke the postProcessBeanFactory callback of all processors handled so far.
+			// 执行实现子类接口父类方法, 按照子类方法的执行顺序
 			invokeBeanFactoryPostProcessors(registryProcessors, beanFactory);
+			// 执行通过API放入的实现子类接口方法的父类接口
 			invokeBeanFactoryPostProcessors(regularPostProcessors, beanFactory);
 		}
 
