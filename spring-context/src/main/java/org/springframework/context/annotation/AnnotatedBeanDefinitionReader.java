@@ -85,6 +85,7 @@ public class AnnotatedBeanDefinitionReader {
 		Assert.notNull(environment, "Environment must not be null");
 		this.registry = registry;
 		this.conditionEvaluator = new ConditionEvaluator(registry, environment, null);
+		// 注册了其他bean definition map中的数据. spring原生的
 		AnnotationConfigUtils.registerAnnotationConfigProcessors(this.registry);
 	}
 

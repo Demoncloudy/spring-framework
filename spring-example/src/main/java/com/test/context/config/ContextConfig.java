@@ -4,8 +4,8 @@ import com.test.context.importBeanDefinitionRegistart.TestImportBeanDefinitionRe
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 
-//@ComponentScan("com.test.context")
-@ComponentScan("com.test.context.bfpp")
-@Import(TestImportBeanDefinitionRegistart.class)
+@ComponentScan("com.test.context.bean")
+//@ComponentScan("com.test.context.bfpp")
+//@Import(TestImportBeanDefinitionRegistart.class)
 public class ContextConfig {
 }

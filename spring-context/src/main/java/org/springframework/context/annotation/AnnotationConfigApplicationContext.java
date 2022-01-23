@@ -63,6 +63,9 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 * through {@link #register} calls and then manually {@linkplain #refresh refreshed}.
 	 */
 	public AnnotationConfigApplicationContext() {
+		// 实例化reader beanDefinition渲染器
+		// 1. 根据类渲染bean definition
+		// 2. 实例化时注册了spring原生的bean definition, 并将其放入了bean definition map中
 		this.reader = new AnnotatedBeanDefinitionReader(this);
 		this.scanner = new ClassPathBeanDefinitionScanner(this);
 	}
@@ -84,7 +87,9 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	 * {@link Configuration @Configuration} classes
 	 */
 	public AnnotationConfigApplicationContext(Class<?>... componentClasses) {
+		// 在父类的构造方法中给bean factory赋值
 		this();
+		// 注册配置类
 		register(componentClasses);
 		refresh();
 	}
@@ -159,6 +164,7 @@ public class AnnotationConfigApplicationContext extends GenericApplicationContex
 	@Override
 	public void register(Class<?>... componentClasses) {
 		Assert.notEmpty(componentClasses, "At least one component class must be specified");
+		// 将提供的类放入bean definition map中
 		this.reader.register(componentClasses);
 	}
 
