@@ -52,7 +52,40 @@ final class PostProcessorRegistrationDelegate {
 	private PostProcessorRegistrationDelegate() {
 	}
 
-
+	/*
+	 *  1. 执行子类postProcessBeanDefinitionRegistry时候的顺寻能否改变
+	 *  API注入 -- Spring内置 -- 扫描出来
+	 *  如果在实现子类接口中通过注解注入bean, 由于Spring内置已经扫描过, 所以这个bean就不会在被扫描到. 只有放入api中才会被扫描到
+	 *
+	 *  2. BeanDefinitionRegistryPostProcessor(子类) 和 ImportBeanDefinitionRegistrar的区别
+	 *
+	 *  ImportBeanDefinitionRegistrar
+	 *  1) 这个注解的实例化和执行registerBeanDefinitions在
+	 *  spring自带的org.springframework.context.annotation.ConfigurationClassPostProcessor执行post processor方法中执行,
+	 *  比其他实现了父类和子类接口的实例化和回调早, 所以其中可以加入@bean等注解来注入bean
+	 *  2) 可以获取到AnnotationMetadata importingClassMetadata, 通过它来获取类上面添加的注解, 从注解中获取到相关的属性
+	 *
+	 *  BeanDefinitionRegistryPostProcessor
+	 *  如果在这里用@bean等注解方法注入bean, 就不会被spring扫描到
+	 *
+	 *  3. 在实现父类接口的方法中PriorityOrdered 优先实例化
+	 *  可以在实现PriorityOrdered的post processor中修改bean name对应的class
+	 *  而子类会注册新的bean, 所以需要每次都取一次, 父类不会注册新的bean
+	 *
+	 *  4. processedBeans中不放入api传过来的.
+	 *  API的bean放入了一个单独的List中, 直接执行完毕. 后面就不会重复执行
+	 *
+	 *  5. BeanDefinitionRegistryPostProcessor对于bean definition的修改,比如bean name相同,修改class, 如何保证正确
+	 *  实现更高等级的接口, 比如PriorityOrdered, Ordered等
+	 *  比如每次从beanFactory中获取新的, 而不是统一获取放入list中, 或许可以解决问题
+	 *
+	 *  6. BeanFactoryPostProcessor(父类)为什么没有直接开放注册bean definition, 但是子类可以
+	 *  (隐式可以, 在spring framework中beanFactory可以强转成DefaultListableBeanFactory来完成注册bean definition)
+	 *  spring实现的源码来说:
+	 *  对于spring来说, 可以不停回调子类的接口的实现方法来注册bean, 并且执行其中post processor方法.
+	 *  对于实现父类接口来说, 这里注册的bean只会被实例化,
+	 *  不会再执行完post processor方法后在回调执行新注入bean的post processor方法, 里面所有关于bean的部分都不会被执行
+	 * */
 	public static void invokeBeanFactoryPostProcessors(
 			ConfigurableListableBeanFactory beanFactory, List<BeanFactoryPostProcessor> beanFactoryPostProcessors) {
 
