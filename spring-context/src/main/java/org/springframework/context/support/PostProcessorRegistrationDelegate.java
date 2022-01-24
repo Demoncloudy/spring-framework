@@ -111,6 +111,7 @@ final class PostProcessorRegistrationDelegate {
 			// 合并, 放入子类的存储中. 以后可以执行父类的方法
 			registryProcessors.addAll(currentRegistryProcessors);
 			// 执行, ConfigurationClassPostProcessor执行完成后, 就完成了扫描
+			// 同时在里面会找到实现了ImportBeanDefinitionRegistrar的方法, 并把他们实例化, 然后回调对应的registerBeanDefinitions方法
 			invokeBeanDefinitionRegistryPostProcessors(currentRegistryProcessors, registry);
 			// 清空
 			currentRegistryProcessors.clear();
